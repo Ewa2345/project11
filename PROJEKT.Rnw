@@ -1,0 +1,446 @@
+\documentclass{article}
+\usepackage[cp1250]{inputenc}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\centerline{\Large{\textsc{Amortyzacja kredytu o sta³ych ratach i sta³ych ratach kapita³owych}}}
+\setlength{\parskip}{4mm}
+
+
+
+
+
+\noindent {\large\bf 1. Kredyt o sta³ych ratach}
+\bigskip
+
+
+
+
+
+Kredyt sp³acany jest w sta³ych ratach wysokoœci $R$, na koniec ka¿dego z kolejnych $n$ lat. Wówczas
+\begin{itemize}
+\item wielkoœæ kredytu to $K=Ra_n $
+\item wielkoœæ kredytu pozosta³a do sp³acenia po wp³aceniu k pierwszych rat
+wynosi $B_k=Ra_n$ i przyjmujemy, ¿e $n=n-k$
+\item odsetki w k-tej racie wynosz¹ $I_k=R(1-v^{\textasciicircum}(n-k+1))$,
+\item kapita³ g³ówny w k-tej racie wynosi $P_k=R(V{\textasciicircum}(n-k+1))$,
+\end{itemize}
+gdzie
+\begin{equation}
+\footnotesize{a_n=\frac{1-v^n}{i}}  
+\end{equation}
+
+\begin{equation}
+\footnotesize{v=\frac{1}{1+i}}.
+\end{equation}
+
+
+\bigskip
+\noindent {\large\bf{ 2. Kredyt o sta³ych ratach kapita³owych.}}
+\bigskip
+
+
+
+
+
+
+Kredyt sp³acany jest w sta³ych ratach kapita³owych wysokoœci $P_k$, na koniec ka¿dego z kolejnych $n$ lat. Wówczas
+\begin{itemize}
+\item wielkoœæ kredytu to $K=nP_k$
+\item wielkoœæ kredytu pozosta³a do sp³acenia po wp³aceniu $k$ pierwszych rat
+wynosi 
+\begin{equation}
+B_k=K(1-\frac{k}{n})
+\end{equation}
+\item odsetki w k-tej racie wynosz¹ 
+\begin{equation}
+I_k=(1-\frac{k-1}{n})Ki
+\end{equation}
+\item kapita³ g³ówny w k-tej racie wynosi
+\begin{equation}
+P_k=\frac{K}{n}.
+\end{equation}
+\end{itemize}
+
+
+
+\bigskip
+
+
+\noindent{\large\textbf{ 3. Obliczanie amortyzacji kredytu}}
+
+
+
+
+Kredyt wynosi 200 000 z³ przy stopie procentowej $i=5\%$ i ma byæ on sp³acany przez $20$ lat. Aby wyznaczyæ amortyzacjê kredytu potrzebujemy obliczyæ kapita³ g³ówny w k-tej racie, odsetki w k-tej racie i pozosta³y kredyt do sp³acenia po sp³aceniu k pierwszych rat. Najpierw policzymy amortyzacjê kredytu w ratach sta³ych a nastêpnie w ratach sta³ych kapita³owych.
+
+
+<<echo=FALSE>>=
+
+K=200000
+i=0.05
+v=1/(1+i)
+n=20
+an=(1-v^n)/i
+R=K/an
+ak=NULL #a(n-1-k) =NULL
+for (k in c(1:n-1)){
+ak[k]=(1-v^k)/i
+}
+ak2=NULL
+for(p in c(1:200)){
+ak2[p]=(1-(1/(1+p*1/1000))^10)/p*(1/1000)  #pomocne 
+}
+I_k=NULL 
+for (k in c(1:n)) {
+I_k[k]=R*(1-v^(n-k+1))
+}
+P_k=NULL 
+for (k in c(1:n)) {
+P_k[k]=R*v^(n-k+1)
+}
+I_k2=NULL 
+for (k in c(1:n)) {
+I_k2[k]=K*i*(1-(k-1)/(n))
+}
+B_k=NULL
+for(k in c(1:(n-1))){
+B_k[k]=R*ak[n-k]
+}
+B2k=NULL
+for(p in c(1:200)){
+B2k[k]=K/((1-(v^n))/i)*(1-(1/(1+p*1/1000))^10)/(p*1/1000)
+}
+B_k[k+1]=0
+R_k2=NULL 
+for (k in c(1:n)) {
+R_k2[k]=I_k2[k]+K/n
+}
+B_k2=NULL
+for (k in c(1:n-1)) {
+B_k2[k]=K*(1-k/n)
+}
+B_k2[k+1]=0
+
+I_2=i*K*((n+1)/2)
+
+I_3=NULL
+for (p in c(1:200)){# ca³e osetkikredyt o ratach sta³ych kapita³owych dla zmiennej stopy procentowej
+I_3[p]=(1/1000)*p*K*((n+1)/2)
+}
+I_4=NULL
+for (p in c(1:200)){#kredyt o ratach sta³ych
+I_4[p]=n*K/((1-(1/(1+(p*1/1000))^n))/(p*1/1000))-K
+}  
+I_k5=NULL
+for (p in c(1:200)){ # kredyt o sta³y ratacj kapita³owych kata rata
+for (k in c(1:n)){
+I_k5[p]=K*p*1/1000*(1-(k-1)/(n))
+}
+}
+I_k6=NULL 
+for (k in c(1:n)){
+for (p in c(1:200)){  
+I_k6[p]=(K/((1-(1/(1+(p*1/1000))^n))/(p*1/1000)))*(1-(1/(1+(p*1/1000)))^(n-k+1))
+}
+}
+B_k3=NULL    #dla rat sta³ych przy zmiennym i 
+for (p in c(1:200)){  
+B_k3[p]=K/((1-(v^n))/i)*(1-(1/(1+p*1/1000))^10)/(p*1/1000)
+}
+
+BK4=120000 # dla rat kapita³owych
+
+@ 
+\begin{enumerate}
+\item[] { K-ta rata sta³a}
+\end{enumerate}
+@
+<<echo=TRUE, results=verbatim>>=
+R
+@
+\begin{enumerate}
+\item[] {Kredyt pozosta³y do sp³aty po sp³aceniu k-pierwszych rat sta³ych}
+\end{enumerate}
+<<echo=TRUE, results=verbatim>>=
+B_k
+@
+\begin{enumerate}
+\item[] {Odestki w k-tej racie sta³ej}
+\end{enumerate}
+<<echo=TRUE, results=verbatim>>=
+I_k
+@
+\begin{enumerate}
+\item[]{ Kapita³ g³ówny w k-tej racie sta³ej}
+\end{enumerate}
+<<echo=TRUE, results=verbatim>>=
+P_k
+@
+\begin{enumerate}
+\item[]{ K-ta rata sta³a kapita³owa }
+\end{enumerate}
+<<echo=TRUE, results=verbatim>>=
+R_k2
+@
+<<echo=FALSE>>=
+@
+\begin{enumerate}
+\item[]{ Kapita³ g³ówny w k-tej racie sta³ej kapita³owej}
+\end{enumerate}
+
+
+<<echo=FALSE>>=
+P_k2=K/n
+@
+<<echo=TRUE, results=verbatim>>=
+P_k2
+@
+\begin{enumerate}
+\item[]{ Kredyt pozosta³y do sp³acenia po sp³aceniu pierwszych k rat sta³ych kapita³owych}
+\end{enumerate}
+<<echo=TRUE, results=verbatim>>=
+B_k2
+@
+\begin{enumerate}
+\item[]{ Odsetki w k-tej racie sta³ej kapita³owej}
+\end{enumerate}
+
+
+<<echo=TRUE>>=
+I_k2
+@
+
+
+
+\noindent{\large\textbf{}}
+
+
+
+\bigskip
+\noindent{\large\textbf{}}
+
+\bigskip
+\noindent{\large\textbf{}}
+
+\bigskip
+\noindent{\large\textbf{}}
+
+\bigskip
+\noindent{\large\textbf{}}
+
+\noindent{\large\textbf{4. £¹czne odsetki od kredytu}}
+\begin{enumerate}
+\item[]{ £¹czne odsetki od ca³ego kredytu bior¹c pod uwagê raty sta³e}
+\end{enumerate}
+<<echo=FALSE>>=
+I=n*R-K
+@
+<<echo=TRUE>>=
+I
+@
+\begin{enumerate}
+\item[]{ £¹czne odsetki od kredytu bi¹r¹c pod uwagê raty sta³e kapita³owe}
+\end{enumerate}
+<<echo=TRUE>>=
+I_2
+@
+\noindent{\large\textbf{ Porównanie odsetek w k-tej racie sta³ej i w k-tej racie sta³ej kapita³owej}}
+\bigskip
+
+<<echo=FALSE, fig=TRUE>>=
+plot(I_k,ylim=c(0,11000),main = "Wykres ró¿nic",font.main=2,col.main="darkblue", col.lab="darkblue", ylab="Wysokoœæ odsetek w ratach", xlab="Numer raty", type = "l", col=("red"),lwd="1",xaxt="n")
+axis(1, at=c(1,5,10,15,20),labels=c("rata 1","rata 5","rata 10","rata 15","rata 20"))
+legend("topright", cex=1.2,c("rata sta³a","rata sta³a kapita³owa"),fill =c("red","black"))
+lines(I_k2,col="black")
+@
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+
+
+
+
+
+
+
+\bigskip
+
+\noindent{\large\textbf{ { Porównanie kapita³ów g³ównych w k-tych ratach  sta³ych i k-tych ratach sta³ych kapita³owych}}}
+\begin{center}
+
+<<echo=FALSE, fig=TRUE>>= 
+plot(P_k,ylim=c(5800,16000),main = "Wykres ró¿nic",font.main=2,col.main="darkblue", col.lab="darkblue", ylab="Wysokoœæ kapita³u g³ównego", xlab="Numer raty", type = "l", col=("red"),lwd="1",xaxt="n")
+axis(1, at=c(1,5,10,15,20),labels=c("rata 1","rata 5","rata 10","rata 15","rata 20"))
+legend("topleft", cex=1.2,c("rata sta³a","rata sta³a kapita³owa"),fill =c("red","green"))
+abline(h=P_k2, col="green")
+@
+\bigskip
+ 
+ Widzimy, ¿e kapita³ g³ówny w ratach sta³ach kapita³owych jest przez ca³y okres taki sam, natomiast kapita³ g³ówny w ratach sta³ych wraz ze wzrostem lat powiêksza siê. 
+
+
+\noindent{\large\textbf{}}
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+\noindent{\large\textbf{}}
+
+
+\bigskip
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+\noindent{\large\textbf{ Porównanie pozosta³oœci sp³at kredytu po sp³aceniu pierwszych k rat sta³ych i pierwszych k rat sta³ych kapita³owych}}
+<<echo=FALSE, fig=TRUE>>=
+plot(B_k,ylim=c(0,200000),main = "Wykres ró¿nic",font.main=2,col.main="darkblue", col.lab="darkblue", ylab="Wysokoœæ sp³at kredytu", xlab="Numer raty", type = "l", col=("red"),lwd="1",xaxt="n")
+axis(1, at=c(1,5,10,15,20),labels=c("rata 1","rata 5","rata 10","rata 15","rata 20"))
+legend("topright", cex=1.2,c("rata sta³a","rata sta³a kapita³owa"),fill =c("red","black"))
+lines(B_k2,col="black")
+@
+
+\bigskip
+
+Zauwa¿amy, ¿e wysokoœæi rat sta³ych pozosta³ych do sp³aty s¹ du¿o wiêksze od wysokoœci rat sta³ych kapita³owych pozosta³ych do sp³aty po k latach.
+\noindent{\large\textbf{}}
+
+
+\bigskip
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+\noindent{\large\textbf{}}
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+
+\bigskip
+\noindent{\large\textbf{ Wp³yw stopy procentowej na ³¹czn¹ wysokoœæ odsetek w racie sta³ej i w racie sta³ej kapita³owej}}
+@
+<<echo=FALSE, fig=TRUE>>=
+plot(I_3,ylim=c(20000,650000),xlim=c(1,201),main = "Wykres ró¿nic odsetek w zale¿noœæi od i",font.main=2,col.main="darkblue", col.lab="darkblue", ylab="Wysokoœæ odsetek ", xlab="Oprocentowanie", type = "l", col=("red"),lwd="1",xaxt="n")
+axis(1, at=c(1,50,100,150,200),labels=c("i=0.001","i=0.05","i=0.1","i=0.15","i=0.2"))
+axis(2,at=c(200000,400000,600000))
+legend("topleft", cex=1.2,c("rata sta³a","rata sta³a kapita³owa"),fill =c("black","red"))
+lines(I_4,col="black")
+@
+\bigskip
+
+Zauwa¿my, ¿e im mniejsza stopa procentowa tym wysokoœæ odsetek jest mniejsza. Stopa procentowa  przedstawiona na wykresie jest z przedzia³u od 0\% do 5\% .
+Gdy wartoœæ $i$= 1\% to wysokoœæ odsetek w ratach sta³ych kapita³owych jest równa 21 000z³ natomiast przy stopie $i$=20\% jest ona równa 420 000z³. Bior¹c pod uwagê raty sta³e to odsetki s¹ du¿o wiêksze ni¿ odsetki w ratach sta³ych kapita³owych. Gdy $i$=1\% to odsetki wynosz¹ 21 666.26 z³. Natomiast dla stopy $i$=20\%  odsetki wynosz¹ 621 426.12 z³. Widzimy, ¿e lepiej w takiej sytuacji wybraæ kredyt o ratach sta³ych kapita³owych, gdy¿ odsetki s¹ du¿o mniejsze, szczególnie gdy bierzemy pod uwagê stopê procentow¹ $i$=20\%.
+
+\noindent{\large\textbf{}}
+\bigskip
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+\noindent{\large\textbf{}}
+
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+\bigskip
+\noindent {\bf Wysokoœæ pozosta³oœci kredytu do zap³aceniu po zap³aceniu pierwszych 10 rat w zale¿noœci od i}
+@
+<<echo=FALSE, fig=TRUE>>=
+plot(B_k3,ylim=c(50000,170000),xlim=c(1,201),main = "Wykres pozosta³oœci kredytu do zap³aty w zale¿noœæi od i",font.main=2,col.main="darkblue", col.lab="darkblue", ylab="Wysokoœæ kredytu ", xlab="Oprocentowanie", type = "l", col=("red"),lwd="1",xaxt="n")
+axis(1, at=c(1,50,100,150,200),labels=c("i=0.001","i=0.05","i=0.1","i=0.15","i=0.2"))
+legend("topright", cex=1.2,c("rata sta³a","rata sta³a kapita³owa"),fill =c("red","black"))
+abline(h=100000,col="black")
+@
+\bigskip
+
+Mo¿emy zauwa¿yæ, ¿e pozosta³oœci kredytu do zap³aty po 10-ciu latach w ratach sta³ych kapita³owych nie zale¿¹ od wspó³czynnika $i$. Natomiast sp³ata kredytu po 10 latach w ratach sta³ych zmienia siê je¿eli $i$ siê zmienia. Im wiêksze $i$ tym wielkoœæ sp³aty kredytu mniejsza.
+
+
+\end{center}
+\newpage
+\bigskip
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+\centerline{\large{\textbf{Kredyt o sta³ych ratach}}}
+<<echo=FALSE, results=tex>>=
+library(xtable) 
+lp=1:n #zaladowac biblioteke
+desc <- data.frame(lp,R,P_k,B_k,I_k)
+                                   row.names=c("Dane")
+names(desc)<-c("Lp.","Rata","Kapita³ g³ówny","Pozosta³o do sp³acenia","Odsetki")
+desc.table <-xtable(desc, caption="Raty sta³e",
+                                  label="Kredyt")
+print(desc.table, include.rownames=TRUE)
+@
+
+\newpage
+\bigskip
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+\bigskip
+
+
+\noindent{\large\textbf{}}
+
+\centerline{\large{\textbf{Kredyt o ratach sta³ych kapita³owych}}}
+<<echo=FALSE, results=tex>>=
+library(xtable) 
+lp=1:n #zaladowac biblioteke
+desc <- data.frame(lp,R_k2,P_k2,B_k2,I_k2)
+                                   row.names=c("Dane")
+names(desc)<-c("Lp.","Rata","Kapita³ g³ówny","Pozosta³o do sp³acenia", "Odsetki")
+desc.table <-xtable(desc, caption="Raty sta³e kapita³owe ",
+                                  label="Kredyt")
+print(desc.table, include.rownames=TRUE)
+@
+                                                
+
+
+
+\end{document}
